@@ -1,0 +1,1933 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreshTrack | Smart Food Management Dashboard</title>
+    <meta name="description"
+        content="FreshTrack helps you track your food inventory, monitor freshness, reduce waste, and make smarter food management decisions.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ===== DESIGN TOKENS ===== */
+        :root {
+            --emerald: #10b981;
+            --emerald-dark: #059669;
+            --emerald-light: #d1fae5;
+            --emerald-xlight: #ecfdf5;
+            --sidebar-bg: #0f172a;
+            --sidebar-text: #94a3b8;
+            --sidebar-active: #ffffff;
+            --sidebar-hover: #1e293b;
+            --sidebar-accent: #10b981;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --text-light: #94a3b8;
+            --red: #ef4444;
+            --red-light: #fef2f2;
+            --amber: #f59e0b;
+            --amber-light: #fffbeb;
+            --blue: #3b82f6;
+            --blue-light: #eff6ff;
+            --purple: #8b5cf6;
+            --purple-light: #f5f3ff;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, .06), 0 1px 2px rgba(0, 0, 0, .04);
+            --shadow: 0 4px 16px rgba(0, 0, 0, .06);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, .08);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --sidebar-w: 250px;
+            --header-h: 64px;
+        }
+
+        /* ===== RESET ===== */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font: inherit;
+        }
+
+        img {
+            max-width: 100%;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-w);
+            height: 100vh;
+            background: var(--sidebar-bg);
+            display: flex;
+            flex-direction: column;
+            z-index: 200;
+            overflow-y: auto;
+            transition: transform .3s ease;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 22px 20px 20px;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--emerald);
+            border-radius: 9px;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+        }
+
+        .logo-icon svg {
+            width: 20px;
+            height: 20px;
+            stroke: #fff;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .logo-text {
+            font-size: 18px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -.3px;
+        }
+
+        .sidebar-nav {
+            padding: 16px 12px;
+            flex: 1;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            color: #475569;
+            text-transform: uppercase;
+            padding: 4px 8px 8px;
+            margin-top: 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 9px 12px;
+            border-radius: var(--radius-sm);
+            color: var(--sidebar-text);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all .15s;
+            margin-bottom: 2px;
+        }
+
+        .nav-item svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+
+        .nav-item:hover {
+            background: var(--sidebar-hover);
+            color: var(--sidebar-active);
+        }
+
+        .nav-item.active {
+            background: var(--emerald);
+            color: #fff;
+        }
+
+        .sidebar-footer {
+            padding: 16px 12px;
+            border-top: 1px solid #1e293b;
+        }
+
+        .sidebar-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            background: #1e293b;
+            font-size: 12px;
+            color: var(--sidebar-text);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--emerald);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, .25);
+            flex-shrink: 0;
+        }
+
+        /* ===== MAIN LAYOUT ===== */
+        .main-wrapper {
+            margin-left: var(--sidebar-w);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== TOP HEADER ===== */
+        .topbar {
+            height: var(--header-h);
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .topbar-left h1 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .topbar-left p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 1px;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .topbar-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--emerald-xlight);
+            border: 1px solid var(--emerald-light);
+            color: var(--emerald-dark);
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .topbar-badge .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--emerald);
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            color: var(--text);
+        }
+
+        .menu-toggle svg {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+        }
+
+        /* ===== PAGE CONTENT ===== */
+        .page-content {
+            padding: 28px;
+            flex: 1;
+        }
+
+        /* ===== FLASH MESSAGES ===== */
+        .flash-list {
+            margin-bottom: 24px;
+            display: grid;
+            gap: 10px;
+        }
+
+        .flash {
+            padding: 13px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            border: 1px solid var(--emerald-light);
+            background: var(--emerald-xlight);
+            color: var(--emerald-dark);
+        }
+
+        .flash.error {
+            background: var(--red-light);
+            border-color: #fecaca;
+            color: #991b1b;
+        }
+
+        .flash svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        /* ===== SECTION ===== */
+        .section {
+            margin-bottom: 32px;
+            scroll-margin-top: 80px;
+        }
+
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .section-head h2 {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .section-head p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* ===== KPI CARDS ===== */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .kpi-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow .2s, transform .2s;
+        }
+
+        .kpi-card:hover {
+            box-shadow: var(--shadow);
+            transform: translateY(-1px);
+        }
+
+        .kpi-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .kpi-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 11px;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+        }
+
+        .kpi-icon svg {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .kpi-icon.green {
+            background: var(--emerald-light);
+            color: var(--emerald-dark);
+        }
+
+        .kpi-icon.blue {
+            background: var(--blue-light);
+            color: var(--blue);
+        }
+
+        .kpi-icon.amber {
+            background: var(--amber-light);
+            color: #b45309;
+        }
+
+        .kpi-icon.purple {
+            background: var(--purple-light);
+            color: var(--purple);
+        }
+
+        .kpi-icon.red {
+            background: var(--red-light);
+            color: var(--red);
+        }
+
+        .kpi-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+
+        .kpi-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text);
+            margin-top: 10px;
+            letter-spacing: -1px;
+            line-height: 1;
+        }
+
+        .kpi-note {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-top: 5px;
+        }
+
+        /* ===== PRIORITY STRIP ===== */
+        .priority-strip {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .priority-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .priority-indicator {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 22px;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .priority-indicator.high {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .priority-indicator.medium {
+            background: #fffbeb;
+            color: #d97706;
+        }
+
+        .priority-indicator.low {
+            background: var(--emerald-xlight);
+            color: var(--emerald-dark);
+        }
+
+        .priority-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .priority-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        /* ===== CARDS ===== */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .card-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 18px;
+        }
+
+        /* ===== ALERT ITEMS ===== */
+        .alert-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .alert-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 13px 16px;
+            transition: background .15s;
+        }
+
+        .alert-row:hover {
+            background: #f8fafc;
+        }
+
+        .alert-row.high {
+            border-left: 3px solid #dc2626;
+        }
+
+        .alert-row.medium {
+            border-left: 3px solid #d97706;
+        }
+
+        .alert-row.low {
+            border-left: 3px solid var(--emerald);
+        }
+
+        .alert-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .alert-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        /* ===== BADGES ===== */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .badge-red {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .badge-amber {
+            background: #fffbeb;
+            color: #92400e;
+        }
+
+        .badge-green {
+            background: var(--emerald-xlight);
+            color: var(--emerald-dark);
+        }
+
+        .badge-slate {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .badge-blue {
+            background: var(--blue-light);
+            color: #1d4ed8;
+        }
+
+        /* ===== TABLE ===== */
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .search-input-wrap {
+            position: relative;
+            flex: 1;
+            max-width: 340px;
+        }
+
+        .search-input-wrap svg {
+            position: absolute;
+            left: 11px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            stroke: var(--text-muted);
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            pointer-events: none;
+        }
+
+        .search-input-wrap input {
+            padding-left: 36px;
+            width: 100%;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 800px;
+            table-layout: auto;
+        }
+
+        th,
+        td {
+            padding: 12px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        th {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            background: #f8fafc;
+        }
+
+        td {
+            color: var(--text);
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .td-name {
+            font-weight: 600;
+        }
+
+        .td-muted {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* ===== FORMS ===== */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 10px 13px;
+            background: var(--surface);
+            color: var(--text);
+            outline: none;
+            font-size: 14px;
+            transition: border-color .15s, box-shadow .15s;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: var(--emerald);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, .12);
+        }
+
+        input::placeholder {
+            color: var(--text-light);
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            padding: 10px 18px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all .15s;
+        }
+
+        .btn svg {
+            width: 15px;
+            height: 15px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .btn-primary {
+            background: var(--emerald);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--emerald-dark);
+        }
+
+        .btn-secondary {
+            background: var(--emerald-xlight);
+            color: var(--emerald-dark);
+            border: 1px solid var(--emerald-light);
+        }
+
+        .btn-secondary:hover {
+            background: var(--emerald-light);
+        }
+
+        .btn-danger {
+            background: var(--red-light);
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        .btn-danger:hover {
+            background: #fee2e2;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+
+        .btn-ghost:hover {
+            background: #f1f5f9;
+            color: var(--text);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        /* ===== TWO COLUMN GRID ===== */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        /* ===== DONUT CHART ===== */
+        .donut-layout {
+            display: grid;
+            grid-template-columns: 160px 1fr;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .donut {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            position: relative;
+            display: grid;
+            place-items: center;
+            margin: auto;
+            background: conic-gradient(#ef4444 0% var(--expired-pct),
+                    #f59e0b var(--expired-pct) 100%);
+        }
+
+        .donut::after {
+            content: "";
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--surface);
+        }
+
+        .donut-center {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .donut-center strong {
+            display: block;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        .donut-center span {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .legend {
+            display: grid;
+            gap: 12px;
+        }
+
+        .legend-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .legend-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+        }
+
+        .legend-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* ===== BAR CHART ===== */
+        .bar-row {
+            margin-bottom: 16px;
+        }
+
+        .bar-head {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-bottom: 6px;
+            color: var(--text-muted);
+        }
+
+        .bar-head strong {
+            color: var(--text);
+        }
+
+        .bar-track {
+            height: 8px;
+            border-radius: 10px;
+            background: #f1f5f9;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width .6s ease;
+        }
+
+        /* ===== AI CARD ===== */
+        .ai-card {
+            background: linear-gradient(135deg, var(--emerald-xlight) 0%, #fff 60%);
+            border-color: var(--emerald-light);
+        }
+
+        .ai-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .ai-icon-box {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            background: var(--emerald);
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+        }
+
+        .ai-icon-box svg {
+            width: 26px;
+            height: 26px;
+            stroke: #fff;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .ai-response {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: var(--radius);
+            border: 1px solid var(--emerald-light);
+            background: var(--surface);
+        }
+
+        .ai-response-title {
+            font-weight: 700;
+            color: var(--emerald-dark);
+            margin-bottom: 10px;
+        }
+
+        .ai-response-body {
+            white-space: pre-wrap;
+            line-height: 1.8;
+            font-size: 14px;
+            color: var(--text);
+            overflow-wrap: anywhere;
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .empty-icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .empty h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        /* ===== DIVIDER ===== */
+        .divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 24px 0;
+        }
+
+        /* ===== ACTIONS ROW ===== */
+        .actions-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* ===== DISCLAIMER ===== */
+        .disclaimer {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-top: 14px;
+            line-height: 1.6;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            padding: 20px 28px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        /* ===== SIDEBAR OVERLAY (mobile) ===== */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .5);
+            z-index: 150;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1200px) {
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 900px) {
+            :root {
+                --sidebar-w: 0px;
+            }
+
+            .sidebar {
+                transform: translateX(-250px);
+                width: 250px;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-wrapper {
+                margin-left: 0;
+            }
+
+            .sidebar-overlay.visible {
+                display: block;
+            }
+
+            .menu-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .donut-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .priority-strip {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full {
+                grid-column: auto;
+            }
+
+            .page-content {
+                padding: 16px;
+            }
+
+            .topbar {
+                padding: 0 16px;
+            }
+
+            .kpi-value {
+                font-size: 26px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
+        <div class="sidebar-logo">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+                    <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+                </svg>
+            </div>
+            <span class="logo-text">FreshTrack</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <span class="nav-label">Main</span>
+
+            <a class="nav-item active" href="#dashboard">
+                <svg viewBox="0 0 24 24">
+                    <rect width="7" height="7" x="3" y="3" rx="1" />
+                    <rect width="7" height="7" x="14" y="3" rx="1" />
+                    <rect width="7" height="7" x="14" y="14" rx="1" />
+                    <rect width="7" height="7" x="3" y="14" rx="1" />
+                </svg>
+                Dashboard
+            </a>
+
+            <a class="nav-item" href="#inventory">
+                <svg viewBox="0 0 24 24">
+                    <path d="m7.5 4.27 9 5.15" />
+                    <path
+                        d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+                    <path d="m3.3 7 8.7 5 8.7-5" />
+                    <path d="M12 22V12" />
+                </svg>
+                Inventory
+            </a>
+
+            <a class="nav-item" href="#add-food">
+                <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 8v8" />
+                    <path d="M8 12h8" />
+                </svg>
+                Add Food
+            </a>
+
+            <span class="nav-label">Analytics</span>
+
+            <a class="nav-item" href="#freshness">
+                <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                </svg>
+                Freshness
+            </a>
+
+            <a class="nav-item" href="#waste">
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 3v18h18" />
+                    <path d="M18 17V9" />
+                    <path d="M13 17V5" />
+                    <path d="M8 17v-3" />
+                </svg>
+                Waste Analytics
+            </a>
+
+            <a class="nav-item" href="#log-waste">
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 6h18" />
+                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                </svg>
+                Log Waste
+            </a>
+
+            <span class="nav-label">AI</span>
+
+            <a class="nav-item" href="#ai-assistant">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 2a8 8 0 0 1 8 8c0 5.25-8 13-8 13S4 15.25 4 10a8 8 0 0 1 8-8z" />
+                    <circle cx="12" cy="10" r="3" />
+                </svg>
+                AI Assistant
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-status">
+                <span class="status-dot"></span>
+                <span>System Active</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Mobile overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+    <!-- ===== MAIN WRAPPER ===== -->
+    <div class="main-wrapper">
+
+        <!-- Top Header -->
+        <header class="topbar">
+            <div style="display:flex; align-items:center; gap:14px;">
+                <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()" aria-label="Toggle menu">
+                    <svg viewBox="0 0 24 24">
+                        <line x1="3" y1="6" x2="21" y2="6" />
+                        <line x1="3" y1="12" x2="21" y2="12" />
+                        <line x1="3" y1="18" x2="21" y2="18" />
+                    </svg>
+                </button>
+                <div class="topbar-left">
+                    <h1>Food Management Dashboard</h1>
+                    <p>Track freshness, reduce waste, eat smarter</p>
+                </div>
+            </div>
+            <div class="topbar-right">
+                <div class="topbar-badge">
+                    <span class="dot"></span>
+                    <span>{{ food_details | length }} Items Tracked</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page content -->
+        <main class="page-content">
+
+            {# Capture flashed messages once for reuse #}
+            {% set all_messages = get_flashed_messages(with_categories=true) %}
+            {% set normal_messages = all_messages | rejectattr('0', 'equalto', 'ai') | list %}
+
+            {% if normal_messages %}
+            <div class="flash-list" role="alert">
+                {% for category, message in normal_messages %}
+                <div class="flash {% if category == 'error' %}error{% endif %}">
+                    {% if category == 'error' %}
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                    {% else %}
+                    <svg viewBox="0 0 24 24">
+                        <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    {% endif %}
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- ===== SECTION: KPI OVERVIEW ===== -->
+            <section class="section" id="dashboard">
+                <div class="section-head">
+                    <div>
+                        <h2>Dashboard Overview</h2>
+                        <p>A live summary of your current food inventory and waste records.</p>
+                    </div>
+                </div>
+
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-label">Food Items</span>
+                            <span class="kpi-icon green">
+                                <svg viewBox="0 0 24 24">
+                                    <path
+                                        d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+                                    <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+                                </svg>
+                            </span>
+                        </div>
+                        <div class="kpi-value">{{ food_details | length }}</div>
+                        <div class="kpi-note">Inventory records tracked</div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-label">Total Quantity</span>
+                            <span class="kpi-icon blue">
+                                <svg viewBox="0 0 24 24">
+                                    <path
+                                        d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+                                    <path d="m3.3 7 8.7 5 8.7-5" />
+                                    <path d="M12 22V12" />
+                                </svg>
+                            </span>
+                        </div>
+                        <div class="kpi-value">{{ food_details | sum(attribute='quantity') }}</div>
+                        <div class="kpi-note">Total units currently stored</div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-label">Storage Types</span>
+                            <span class="kpi-icon amber">
+                                <svg viewBox="0 0 24 24">
+                                    <path
+                                        d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Z" />
+                                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                                </svg>
+                            </span>
+                        </div>
+                        <div class="kpi-value">{{ food_details | map(attribute='storage') | unique | list | length }}
+                        </div>
+                        <div class="kpi-note">Storage methods in use</div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-label">Units Wasted</span>
+                            <span class="kpi-icon red">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M3 6h18" />
+                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                </svg>
+                            </span>
+                        </div>
+                        <div class="kpi-value">{{ waste_records | sum(attribute='quantity') }}</div>
+                        <div class="kpi-note">{{ waste_records | length }} waste records total</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== SECTION: FRESHNESS PRIORITY ===== -->
+            <section class="section" id="freshness">
+                <div class="section-head">
+                    <div>
+                        <h2>Freshness Monitoring</h2>
+                        <p>Review food items that may need attention based on their estimated freshness.</p>
+                    </div>
+                </div>
+
+                <div class="priority-strip">
+                    <div class="priority-card">
+                        <div class="priority-indicator high">{{ high_priority_count }}</div>
+                        <div>
+                            <div class="priority-title">High Priority</div>
+                            <div class="priority-label">Expired or critical</div>
+                        </div>
+                    </div>
+                    <div class="priority-card">
+                        <div class="priority-indicator medium">{{ medium_priority_count }}</div>
+                        <div>
+                            <div class="priority-title">Medium Priority</div>
+                            <div class="priority-label">Expiring very soon</div>
+                        </div>
+                    </div>
+                    <div class="priority-card">
+                        <div class="priority-indicator low">{{ low_priority_count }}</div>
+                        <div>
+                            <div class="priority-title">Low Priority</div>
+                            <div class="priority-label">Fresh estimate</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Freshness Alerts</div>
+                    <div class="card-desc">Items that need attention or are close to their estimated storage limit.
+                    </div>
+
+                    {% set attention_items = food_details | selectattr('priority', 'in', ['High', 'Medium']) | list %}
+                    {% if attention_items %}
+                    <div class="alert-list">
+                        {% for food in attention_items %}
+                        <div class="alert-row {{ food.priority | lower }}">
+                            <div>
+                                <div class="alert-name">{{ food.name }}</div>
+                                <div class="alert-meta">
+                                    Qty: {{ food.quantity }} &middot; Storage: {{ food.storage }}
+                                    {% if food.remaining_days is not none %}
+                                    &middot;
+                                    {% if food.remaining_days < 0 %}Past estimated freshness period {% elif
+                                        food.remaining_days==0 %}Estimated period ends today {% else %}~{{
+                                        food.remaining_days }} day(s) remaining {% endif %} {% endif %} </div>
+                                </div>
+                                <span
+                                    class="badge {% if food.priority == 'High' %}badge-red{% elif food.priority == 'Medium' %}badge-amber{% else %}badge-green{% endif %}">
+                                    {{ food.priority }} Priority
+                                </span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% elif food_details %}
+                        <div class="empty">
+                            <span class="empty-icon">✅</span>
+                            <h3>All items look good!</h3>
+                            <p>No items currently need urgent attention.</p>
+                        </div>
+                        {% else %}
+                        <div class="empty">
+                            <span class="empty-icon">🥦</span>
+                            <h3>No inventory yet</h3>
+                            <p>Add food items to start monitoring freshness.</p>
+                        </div>
+                        {% endif %}
+
+                        <p class="disclaimer">
+                            Freshness estimates are planning guides only. Always check the food's actual condition
+                            and follow appropriate food-safety guidance before consuming.
+                        </p>
+                    </div>
+            </section>
+
+            <!-- ===== SECTION: FOOD INVENTORY ===== -->
+            <section class="section" id="inventory">
+                <div class="section-head">
+                    <div>
+                        <h2>Food Inventory</h2>
+                        <p>View and manage all your recorded food items.</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    {% if food_details %}
+
+                    <div class="search-bar">
+                        <div class="search-input-wrap">
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="11" cy="11" r="8" />
+                                <path d="m21 21-4.35-4.35" />
+                            </svg>
+                            <input type="text" id="inventorySearch" placeholder="Search food items…"
+                                oninput="filterInventory(this.value)">
+                        </div>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table id="inventoryTable">
+                            <thead>
+                                <tr>
+                                    <th>Food</th>
+                                    <th>Qty</th>
+                                    <th>Purchase Date</th>
+                                    <th>Storage</th>
+                                    <th>Freshness</th>
+                                    <th>Priority</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for food in food_details %}
+                                <tr data-food="{{ food.name | lower }}">
+                                    <td>
+                                        <div class="td-name">{{ food.name }}</div>
+                                    </td>
+                                    <td>{{ food.quantity }}</td>
+                                    <td>{{ food.purchase_date }}</td>
+                                    <td>
+                                        <span class="badge badge-slate">{{ food.storage | capitalize }}</span>
+                                    </td>
+                                    <td>
+                                        {% if food.freshness_status == 'expired' %}
+                                        <span class="badge badge-red">Expired estimate</span>
+                                        {% elif food.freshness_status == 'warning' %}
+                                        <span class="badge badge-amber">Use caution</span>
+                                        {% elif food.freshness_status == 'info' %}
+                                        <span class="badge badge-green">Fresh estimate</span>
+                                        {% else %}
+                                        <span class="badge badge-slate">Unknown</span>
+                                        {% endif %}
+                                        <div class="td-muted">{{ food.freshness_text }}</div>
+                                    </td>
+                                    <td>
+                                        <span
+                                            class="badge {% if food.priority == 'High' %}badge-red{% elif food.priority == 'Medium' %}badge-amber{% else %}badge-green{% endif %}">
+                                            {{ food.priority }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="actions-row">
+                                            <a class="btn btn-ghost btn-sm"
+                                                href="{{ url_for('edit_food', food_id=food.id) }}">Edit</a>
+                                            <form method="POST" action="{{ url_for('delete_food', food_id=food.id) }}"
+                                                onsubmit="return confirm('Delete this food record?');">
+                                                <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {% else %}
+                    <div class="empty">
+                        <span class="empty-icon">🧺</span>
+                        <h3>No food items yet</h3>
+                        <p>Use the Add Food form below to record your first item.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <!-- ===== SECTION: ADD FOOD ===== -->
+            <section class="section" id="add-food">
+                <div class="section-head">
+                    <div>
+                        <h2>Add Food Item</h2>
+                        <p>Record a new food item to track its estimated freshness.</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <form method="POST" action="{{ url_for('add_food') }}">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="food_name">Food Name</label>
+                                <input type="text" id="food_name" name="food_name" placeholder="e.g. Apple, Milk, Bread"
+                                    required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="quantity">Quantity</label>
+                                <input type="number" id="quantity" name="quantity" min="1" step="0.5"
+                                    placeholder="Enter quantity" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="purchase_date">Purchase Date</label>
+                                <input type="date" id="purchase_date" name="purchase_date" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="storage">Storage Method</label>
+                                <select id="storage" name="storage" required>
+                                    <option value="">Select storage type</option>
+                                    <option value="room">Room Temperature</option>
+                                    <option value="fridge">Fridge</option>
+                                    <option value="freezer">Freezer</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group full">
+                                <button type="submit" class="btn btn-primary">
+                                    <svg viewBox="0 0 24 24">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M12 8v8" />
+                                        <path d="M8 12h8" />
+                                    </svg>
+                                    Add to Inventory
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- ===== SECTION: WASTE ANALYTICS ===== -->
+            <section class="section" id="waste">
+                <div class="section-head">
+                    <div>
+                        <h2>Waste Analytics</h2>
+                        <p>Understand your recorded food waste patterns and trends.</p>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <!-- Waste Distribution Donut -->
+                    <div class="card">
+                        <div class="card-title">Waste Distribution</div>
+                        <div class="card-desc">Breakdown of recorded waste by reason.</div>
+
+                        {% set expired_qty = waste_records | selectattr('reason', 'equalto', 'Expired') |
+                        sum(attribute='quantity') %}
+                        {% set other_qty = waste_records | rejectattr('reason', 'equalto', 'Expired') |
+                        sum(attribute='quantity') %}
+                        {% set total_waste = waste_records | sum(attribute='quantity') %}
+                        {% set expired_pct = ((expired_qty / total_waste * 100) | round(0) | int) if total_waste > 0
+                        else 0 %}
+
+                        {% if total_waste > 0 %}
+                        <div class="donut-layout">
+                            <div class="donut" style="--expired-pct: {{ expired_pct }}%;">
+                                <div class="donut-center">
+                                    <strong>{{ total_waste }}</strong>
+                                    <span>Total units</span>
+                                </div>
+                            </div>
+                            <div class="legend">
+                                <div class="legend-row">
+                                    <span class="legend-label">
+                                        <span class="legend-dot" style="background:#ef4444;"></span>
+                                        Expired
+                                    </span>
+                                    <strong>{{ expired_qty }}</strong>
+                                </div>
+                                <div class="legend-row">
+                                    <span class="legend-label">
+                                        <span class="legend-dot" style="background:#f59e0b;"></span>
+                                        Other Reasons
+                                    </span>
+                                    <strong>{{ other_qty }}</strong>
+                                </div>
+                                <p style="font-size:12px; color:var(--text-light);">
+                                    {{ expired_pct }}% of recorded waste was expired.
+                                </p>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="empty">
+                            <span class="empty-icon">📊</span>
+                            <h3>No waste recorded</h3>
+                            <p>Log waste below to see analytics here.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Waste Summary Bars -->
+                    <div class="card">
+                        <div class="card-title">Waste Summary</div>
+                        <div class="card-desc">Quantity of waste grouped by reason.</div>
+
+                        {% if total_waste > 0 %}
+                        <div class="bar-row">
+                            <div class="bar-head">
+                                <span>Expired</span>
+                                <strong>{{ expired_qty }} units</strong>
+                            </div>
+                            <div class="bar-track">
+                                <div class="bar-fill"
+                                    style="width:{{ (expired_qty / total_waste * 100) | round(1) }}%; background:#ef4444;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bar-row">
+                            <div class="bar-head">
+                                <span>Damaged / Other</span>
+                                <strong>{{ other_qty }} units</strong>
+                            </div>
+                            <div class="bar-track">
+                                <div class="bar-fill"
+                                    style="width:{{ (other_qty / total_waste * 100) | round(1) }}%; background:#f59e0b;">
+                                </div>
+                            </div>
+                        </div>
+                        <p class="disclaimer" style="margin-top:12px;">Use these results to identify where food waste
+                            can be reduced.</p>
+                        {% else %}
+                        <div class="empty">
+                            <span class="empty-icon">📈</span>
+                            <h3>No data yet</h3>
+                            <p>Record waste to see your summary here.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== SECTION: LOG WASTE ===== -->
+            <section class="section" id="log-waste">
+                <div class="section-head">
+                    <div>
+                        <h2>Log Food Waste</h2>
+                        <p>Record food that was discarded and why it was wasted.</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <form method="POST" action="{{ url_for('log_waste') }}">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="waste_food_name">Food Name</label>
+                                <input type="text" id="waste_food_name" name="food_name" placeholder="e.g. Bread, Milk"
+                                    required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="waste_quantity">Quantity Wasted</label>
+                                <input type="number" id="waste_quantity" name="quantity" min="1" step="0.5"
+                                    placeholder="Enter quantity" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="reason">Reason</label>
+                                <select id="reason" name="reason" required>
+                                    <option value="">Select reason</option>
+                                    <option value="Expired">Expired</option>
+                                    <option value="Damaged">Damaged</option>
+                                    <option value="Spoiled">Spoiled</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="waste_date">Date</label>
+                                <input type="date" id="waste_date" name="waste_date" required>
+                            </div>
+
+                            <div class="form-group full">
+                                <button type="submit" class="btn btn-primary">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M3 6h18" />
+                                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                    </svg>
+                                    Record Waste
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- ===== SECTION: WASTE HISTORY ===== -->
+            <section class="section">
+                <div class="section-head">
+                    <div>
+                        <h2>Waste History</h2>
+                        <p>Review and manage your previously recorded waste records.</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    {% if waste_records %}
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Food</th>
+                                    <th>Quantity</th>
+                                    <th>Reason</th>
+                                    <th>Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for waste in waste_records %}
+                                <tr>
+                                    <td class="td-name">{{ waste.food_name }}</td>
+                                    <td>{{ waste.quantity }}</td>
+                                    <td>
+                                        <span class="badge
+                                        {% if waste.reason == 'Expired' %}badge-red
+                                        {% elif waste.reason == 'Damaged' or waste.reason == 'Spoiled' %}badge-amber
+                                        {% else %}badge-slate{% endif %}">
+                                            {{ waste.reason }}
+                                        </span>
+                                    </td>
+                                    <td>{{ waste.waste_date }}</td>
+                                    <td>
+                                        <form method="POST" action="{{ url_for('delete_waste', waste_id=waste.id) }}"
+                                            onsubmit="return confirm('Delete this waste record?');">
+                                            <input type="hidden" name="waste_id" value="{{ waste.id }}">
+                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="empty">
+                        <span class="empty-icon">🌱</span>
+                        <h3>No waste records yet</h3>
+                        <p>Great job! Log waste above when food is discarded.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <!-- ===== SECTION: AI ASSISTANT ===== -->
+            <section class="section" id="ai-assistant">
+                <div class="section-head">
+                    <div>
+                        <h2>AI Assistant</h2>
+                        <p>Get personalized suggestions for reducing food waste.</p>
+                    </div>
+                </div>
+
+                <div class="card ai-card">
+                    <div class="ai-header">
+                        <div class="ai-icon-box">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 2a8 8 0 0 1 8 8c0 5.25-8 13-8 13S4 15.25 4 10a8 8 0 0 1 8-8z" />
+                                <circle cx="12" cy="10" r="3" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="card-title">FreshTrack AI Recommendations</div>
+                            <div class="card-desc" style="margin-bottom:0;">
+                                Analyze your inventory and get actionable suggestions to cut waste.
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <form method="POST" action="{{ url_for('ai_assistant') }}">
+                        <label for="ai_question">Ask FreshTrack AI a question</label>
+                        <textarea id="ai_question" name="ai_question" rows="3"
+                            placeholder="Example: How can I use my bananas before they spoil?"></textarea>
+
+                        <button type="submit" class="btn btn-primary">
+                            Ask AI
+                        </button>
+                    </form>
+
+                    <button type="submit" class="btn btn-primary">
+                        <svg viewBox="0 0 24 24">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                        </svg>
+                        Generate AI Recommendations
+                    </button>
+                    </form>
+
+                    {# Reuse all_messages without calling get_flashed_messages again #}
+                    {% for category, message in all_messages %}
+                    {% if category == 'ai' %}
+                    <div class="ai-response">
+                        <div class="ai-response-title">Your Personalized Recommendations</div>
+                        <div class="ai-response-body">{{ message }}</div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+
+                    <p class="disclaimer">
+                        AI suggestions are informational only. Always check food condition and follow
+                        food-safety guidance before deciding whether food is safe to eat.
+                    </p>
+                </div>
+                
+<div class="card">
+    
+<h3>FreshTrack AI Chat History</h3>
+
+<div class="chat-history">
+    {% if chat_history %}
+        {% for chat in chat_history %}
+            <div class="chat-message user-message">
+                <div class="chat-label">You</div>
+                <div class="chat-bubble">
+                    {{ chat["question"] }}
+                </div>
+            </div>
+
+            <div class="chat-message ai-message">
+                <div class="chat-label">FreshTrack AI</div>
+                <div class="chat-bubble">
+                    <div class="ai-response-body">{{ chat["answer"] }}</div>
+                </div>
+                <small class="chat-time">{{ chat["created_at"] }}</small>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No previous conversations yet. Ask FreshTrack AI a question to get started!</p>
+    {% endif %}
+</div>
+
+
+            </section>
+
+        </main>
+
+        <footer class="footer">
+            <p>FreshTrack &copy; 2026 &mdash; Smart Food Management &amp; Waste Reduction &mdash; Track freshness, make
+                informed decisions, reduce waste.</p>
+        </footer>
+    </div>
+
+    <script>
+        // ===== SET TODAY'S DATE =====
+        document.addEventListener("DOMContentLoaded", function () {
+            const today = new Date();
+            const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000)
+                .toISOString().split("T")[0];
+            ["purchase_date", "waste_date"].forEach(function (id) {
+                const field = document.getElementById(id);
+                if (field && !field.value) field.value = localDate;
+            });
+        });
+
+        // ===== INVENTORY SEARCH =====
+        function filterInventory(query) {
+            const rows = document.querySelectorAll("#inventoryTable tbody tr");
+            const q = query.toLowerCase().trim();
+            rows.forEach(function (row) {
+                const name = row.getAttribute("data-food") || "";
+                row.style.display = (!q || name.includes(q)) ? "" : "none";
+            });
+        }
+
+        // ===== SIDEBAR TOGGLE =====
+        function toggleSidebar() {
+            const sidebar = document.getElementById("sidebar");
+            const overlay = document.getElementById("sidebarOverlay");
+            sidebar.classList.toggle("open");
+            overlay.classList.toggle("visible");
+        }
+
+        function closeSidebar() {
+            document.getElementById("sidebar").classList.remove("open");
+            document.getElementById("sidebarOverlay").classList.remove("visible");
+        }
+
+        // ===== ACTIVE NAV HIGHLIGHT =====
+        document.addEventListener("DOMContentLoaded", function () {
+            const navItems = document.querySelectorAll(".nav-item");
+            navItems.forEach(function (item) {
+                item.addEventListener("click", function () {
+                    navItems.forEach(n => n.classList.remove("active"));
+                    this.classList.add("active");
+                    // Close sidebar on mobile
+                    if (window.innerWidth < 900) closeSidebar();
+                });
+            });
+        });
+    </script>
+
+</body>
+
+</html>

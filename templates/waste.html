@@ -1,0 +1,243 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Record Food Waste | FreshTrack</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+<div class="app-layout">
+
+    <aside class="sidebar">
+        <a href="{{ url_for('home') }}" class="brand">
+            <span class="brand-icon"><i class="fa-solid fa-leaf"></i></span>
+            <span>FreshTrack<small>SMART FOOD CARE</small></span>
+        </a>
+
+        <p class="menu-label">WORKSPACE</p>
+
+        <a href="{{ url_for('home') }}" class="side-link">
+            <i class="fa-solid fa-house"></i> Dashboard
+        </a>
+
+        <a href="{{ url_for('home') }}#inventory" class="side-link">
+            <i class="fa-solid fa-boxes-stacked"></i> Food Inventory
+        </a>
+
+        <a href="{{ url_for('home') }}#add-food" class="side-link">
+            <i class="fa-solid fa-circle-plus"></i> Add Food
+        </a>
+
+        <a href="{{ url_for('home') }}#analytics" class="side-link">
+            <i class="fa-solid fa-chart-pie"></i> Waste Analytics
+        </a>
+
+        <a href="{{ url_for('waste_page') }}" class="side-link active">
+            <i class="fa-solid fa-trash-can"></i> Record Food Waste
+        </a>
+
+        <div class="sidebar-bottom">
+            <div class="sidebar-tip">
+                <i class="fa-solid fa-seedling"></i>
+                <h4>Every item counts</h4>
+                <p>Track food waste to discover patterns and reduce unnecessary waste.</p>
+            </div>
+
+            <div class="user-profile">
+                <div class="avatar">
+                    {{ session.get('username', 'U')[0]|upper }}
+                </div>
+
+                <div class="user-details">
+                    <strong>{{ session.get('username', 'User') }}</strong>
+                    <small>FreshTrack user</small>
+                </div>
+
+                <form action="{{ url_for('logout') }}" method="POST">
+                    <button type="submit" class="logout-btn" title="Log out">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-panel">
+
+        <header class="topbar">
+            <div>
+                <p class="eyebrow">FOOD WASTE MANAGEMENT</p>
+                <h1>Record Food Waste <span>🌿</span></h1>
+                <p class="subheading">
+                    Record discarded food and understand how to reduce future waste.
+                </p>
+            </div>
+
+            <a href="{{ url_for('home') }}" class="primary-btn">
+                <i class="fa-solid fa-arrow-left"></i> Dashboard
+            </a>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-container">
+            {% for category, message in messages %}
+            <div class="flash-message {{ category }}">
+                <span>{{ message }}</span>
+                <button type="button" onclick="this.parentElement.remove()" aria-label="Dismiss">×</button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <section class="dashboard-section">
+            <div class="section-heading">
+                <div>
+                    <h2><i class="fa-solid fa-clipboard-list section-icon"></i> Waste Details</h2>
+                    <p>Enter the details of the food you discarded.</p>
+                </div>
+            </div>
+
+            <div class="panel waste-form-panel">
+
+                <div class="waste-intro">
+                    <div class="waste-intro-icon">
+                        <i class="fa-solid fa-recycle"></i>
+                    </div>
+                    <div>
+                        <h3>Let's track this waste</h3>
+                        <p>Accurate records help you identify common waste reasons.</p>
+                    </div>
+                </div>
+
+                <form action="{{ url_for('add_waste') }}" method="POST" class="waste-form">
+
+                    <div class="form-field">
+                        <label for="foodName">Food name</label>
+                        <input
+                            type="text"
+                            id="foodName"
+                            name="foodName"
+                            placeholder="e.g. Apples, Bread, Rice"
+                            maxlength="100"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-field">
+                        <label for="quantity">Quantity discarded</label>
+                        <input
+                            type="number"
+                            id="quantity"
+                            name="quantity"
+                            min="1"
+                            step="1"
+                            placeholder="Enter quantity"
+                            required
+                        >
+                        <small class="field-help">Use the same quantity unit consistently in your records.</small>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="wasteDate">Date discarded</label>
+                        <input
+                            type="date"
+                            id="wasteDate"
+                            name="wasteDate"
+                            max="{{ today }}"
+                            value="{{ today }}"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-field">
+                        <label for="reason">Reason for waste</label>
+                        <select id="reason" name="reason" required>
+                            <option value="">Select a reason</option>
+                            <option value="Spoiled">Spoiled</option>
+                            <option value="Expired">Expired</option>
+                            <option value="Excess food">Excess food</option>
+                            <option value="Damaged">Damaged</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="waste-form-actions">
+                        <button type="submit" class="primary-btn">
+                            <i class="fa-solid fa-floppy-disk"></i> Save Waste Record
+                        </button>
+
+                        <a href="{{ url_for('home') }}" class="cancel-link">
+                            Cancel
+                        </a>
+                    </div>
+
+                </form>
+            </div>
+        </section>
+
+        <section class="dashboard-section">
+            <div class="section-heading">
+                <div>
+                    <h2><i class="fa-solid fa-lightbulb section-icon"></i> Why record food waste?</h2>
+                    <p>Use your records to make better food-management decisions.</p>
+                </div>
+            </div>
+
+            <div class="waste-benefits-grid">
+                <article class="benefit-card benefit-sage">
+                    <span><i class="fa-solid fa-magnifying-glass-chart"></i></span>
+                    <h3>Find patterns</h3>
+                    <p>Identify which foods are discarded most often.</p>
+                </article>
+
+                <article class="benefit-card benefit-lavender">
+                    <span><i class="fa-solid fa-calendar-check"></i></span>
+                    <h3>Plan better</h3>
+                    <p>Use past records to improve future food planning.</p>
+                </article>
+
+                <article class="benefit-card benefit-peach">
+                    <span><i class="fa-solid fa-leaf"></i></span>
+                    <h3>Reduce waste</h3>
+                    <p>Make informed choices to avoid unnecessary discarding.</p>
+                </article>
+            </div>
+        </section>
+
+        <footer class="page-footer">
+            <span><i class="fa-solid fa-leaf"></i> FreshTrack</span>
+            <p>Plan smarter. Keep food fresh. Reduce waste.</p>
+        </footer>
+
+    </main>
+</div>
+
+<script>
+    const wasteDateInput = document.getElementById("wasteDate");
+
+    if (wasteDateInput) {
+        const today = new Date();
+        const localToday = new Date(
+            today.getTime() - today.getTimezoneOffset() * 60000
+        ).toISOString().split("T")[0];
+
+        if (!wasteDateInput.value) {
+            wasteDateInput.value = localToday;
+        }
+
+        wasteDateInput.max = localToday;
+    }
+</script>
+
+</body>
+</html>

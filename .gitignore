@@ -1,0 +1,9 @@
+.env
+__pycache__/
+freshtrack.db
+freshtrack_backup.db
+freshtrack_before_chat_history.db
+*.db
+*.db.*
+*.sqlite
+*.sqlite3

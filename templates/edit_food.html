@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Food | FreshTrack</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { font-size: 16px; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            color: #0f172a;
+            min-height: 100vh;
+        }
+
+        a { color: inherit; text-decoration: none; }
+        button, input, select { font: inherit; }
+
+        /* Navbar */
+        .topbar {
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+            height: 60px;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 28px;
+            position: sticky; top: 0; z-index: 100;
+        }
+
+        .brand {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 17px; font-weight: 800; color: #0f172a;
+        }
+
+        .brand-icon {
+            width: 34px; height: 34px; border-radius: 9px;
+            background: #10b981; display: grid; place-items: center;
+        }
+        .brand-icon svg { width: 18px; height: 18px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+        .nav-links { display: flex; gap: 4px; }
+        .nav-link {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 7px 12px; border-radius: 8px;
+            font-size: 13px; font-weight: 500; color: #64748b;
+            transition: all .15s;
+        }
+        .nav-link:hover { background: #f1f5f9; color: #0f172a; }
+        .nav-link svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+        /* Main */
+        .page { max-width: 700px; margin: 40px auto; padding: 0 24px 60px; }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 13px; color: #64748b; margin-bottom: 24px;
+        }
+        .breadcrumb a { color: #10b981; font-weight: 500; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .breadcrumb-sep { color: #cbd5e1; }
+
+        /* Card */
+        .card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 32px;
+            box-shadow: 0 1px 3px rgba(0,0,0,.06);
+        }
+
+        .card-header { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
+
+        .edit-icon {
+            width: 48px; height: 48px; border-radius: 12px;
+            background: #ecfdf5; display: grid; place-items: center; flex-shrink: 0;
+        }
+        .edit-icon svg { width: 24px; height: 24px; stroke: #059669; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+        .card-title { font-size: 20px; font-weight: 800; color: #0f172a; }
+        .card-desc  { font-size: 13px; color: #64748b; margin-top: 3px; }
+
+        /* Form */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        .form-group { display: flex; flex-direction: column; gap: 7px; }
+        .form-group.full { grid-column: 1 / -1; }
+
+        label { font-size: 13px; font-weight: 600; color: #334155; }
+
+        input, select {
+            width: 100%;
+            border: 1px solid #e2e8f0;
+            border-radius: 9px;
+            padding: 11px 14px;
+            font-size: 14px;
+            color: #0f172a;
+            background: #f8fafc;
+            outline: none;
+            transition: border-color .15s, box-shadow .15s, background .15s;
+        }
+        input:focus, select:focus {
+            border-color: #10b981;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(16,185,129,.12);
+        }
+        input::placeholder { color: #94a3b8; }
+
+        /* Buttons */
+        .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+        .btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 11px 20px; border-radius: 9px;
+            font-size: 14px; font-weight: 600; cursor: pointer;
+            transition: all .15s; border: none;
+        }
+        .btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+        .btn-primary { background: #10b981; color: #fff; }
+        .btn-primary:hover { background: #059669; }
+
+        .btn-ghost { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+        .btn-ghost:hover { background: #e2e8f0; color: #0f172a; }
+
+        /* Footer */
+        .footer { text-align: center; padding: 24px; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; margin-top: 60px; }
+
+        @media (max-width: 640px) {
+            .nav-links { display: none; }
+            .form-grid { grid-template-columns: 1fr; }
+            .form-group.full { grid-column: auto; }
+            .card { padding: 22px 18px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Topbar -->
+<header class="topbar">
+    <a href="{{ url_for('home') }}" class="brand">
+        <div class="brand-icon">
+            <svg viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+        </div>
+        FreshTrack
+    </a>
+
+    <nav class="nav-links" aria-label="Navigation">
+        <a class="nav-link" href="{{ url_for('home') }}">
+            <svg viewBox="0 0 24 24"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+            Dashboard
+        </a>
+        <a class="nav-link" href="{{ url_for('home') }}#inventory">
+            <svg viewBox="0 0 24 24"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+            Inventory
+        </a>
+    </nav>
+</header>
+
+<main class="page">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="{{ url_for('home') }}">Dashboard</a>
+        <span class="breadcrumb-sep">/</span>
+        <a href="{{ url_for('home') }}#inventory">Inventory</a>
+        <span class="breadcrumb-sep">/</span>
+        <span>Edit Food Item</span>
+    </nav>
+
+    <!-- Edit Form Card -->
+    <div class="card">
+        <div class="card-header">
+            <div class="edit-icon">
+                <svg viewBox="0 0 24 24"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+            </div>
+            <div>
+                <div class="card-title">Edit Food Details</div>
+                <div class="card-desc">Update the information for this food item.</div>
+            </div>
+        </div>
+
+        <form action="{{ url_for('edit_food', food_id=food[0]) }}" method="POST">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="food_name">Food Name</label>
+                    <input type="text" id="food_name" name="food_name"
+                           value="{{ food[1] }}"
+                           placeholder="Food item name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="quantity">Quantity</label>
+                    <input type="number" id="quantity" name="quantity"
+                           value="{{ food[2] }}"
+                           min="1" step="0.5"
+                           placeholder="Item quantity" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="purchase_date">Purchase Date</label>
+                    <input type="date" id="purchase_date" name="purchase_date"
+                           value="{{ food[3] }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="storage">Storage Method</label>
+                    <select id="storage" name="storage" required>
+                        <option value="room"    {% if food[4] | lower == 'room'    %}selected{% endif %}>Room Temperature</option>
+                        <option value="fridge"  {% if food[4] | lower == 'fridge'  %}selected{% endif %}>Fridge</option>
+                        <option value="freezer" {% if food[4] | lower == 'freezer' %}selected{% endif %}>Freezer</option>
+                    </select>
+                </div>
+
+                <div class="form-group full">
+                    <div class="btn-row">
+                        <button type="submit" class="btn btn-primary">
+                            <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                            Save Changes
+                        </button>
+
+                        <a href="{{ url_for('home') }}" class="btn btn-ghost">
+                            <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+                            Cancel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</main>
+
+<footer class="footer">
+    <p>FreshTrack &copy; 2026 &mdash; Smart Food Management &amp; Waste Reduction</p>
+</footer>
+
+</body>
+</html>

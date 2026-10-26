@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account | FreshTrack</title>
+    <meta name="description" content="Create your FreshTrack account to start managing your food inventory and reducing waste.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { font-size: 16px; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            color: #0f172a;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        a { color: inherit; text-decoration: none; }
+        button, input { font: inherit; }
+
+        .auth-page {
+            display: grid;
+            grid-template-columns: 1fr 480px;
+            min-height: 100vh;
+            width: 100%;
+            max-width: 1000px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,.12);
+        }
+
+        .auth-brand {
+            background: linear-gradient(145deg, #0f172a 0%, #1e3a5f 60%, #059669 100%);
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            color: #fff;
+        }
+
+        .brand-logo { display: flex; align-items: center; gap: 12px; }
+        .brand-logo-icon {
+            width: 42px; height: 42px; border-radius: 11px;
+            background: #10b981; display: grid; place-items: center;
+        }
+        .brand-logo-icon svg { width: 22px; height: 22px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .brand-logo-text { font-size: 20px; font-weight: 800; }
+
+        .brand-headline { margin-top: auto; }
+        .brand-headline h2 { font-size: 32px; font-weight: 800; line-height: 1.2; margin-bottom: 12px; }
+        .brand-headline p  { color: rgba(255,255,255,.7); font-size: 15px; line-height: 1.6; }
+
+        .brand-features { margin-top: 36px; display: grid; gap: 14px; }
+        .brand-feature {
+            display: flex; align-items: center; gap: 12px;
+            font-size: 14px; color: rgba(255,255,255,.85);
+        }
+        .feature-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; flex-shrink: 0; }
+
+        .auth-form-panel {
+            background: #fff;
+            padding: 44px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow-y: auto;
+        }
+
+        .auth-title    { font-size: 26px; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
+        .auth-subtitle { font-size: 14px; color: #64748b; margin-bottom: 28px; }
+
+        .flash-msg {
+            padding: 11px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 18px;
+            border: 1px solid #fecaca;
+            background: #fef2f2;
+            color: #991b1b;
+        }
+        .flash-msg.success { border-color: #bbf7d0; background: #f0fdf4; color: #166534; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 4px; }
+        .form-group.full { grid-column: 1 / -1; }
+
+        label { font-size: 13px; font-weight: 600; color: #334155; }
+
+        input[type="text"], input[type="email"], input[type="password"] {
+            border: 1px solid #e2e8f0;
+            border-radius: 9px;
+            padding: 11px 14px;
+            font-size: 14px;
+            color: #0f172a;
+            background: #f8fafc;
+            outline: none;
+            width: 100%;
+            transition: border-color .15s, box-shadow .15s, background .15s;
+        }
+        input:focus {
+            border-color: #10b981;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(16,185,129,.12);
+        }
+        input::placeholder { color: #94a3b8; }
+
+        .btn-submit {
+            width: 100%; padding: 12px;
+            background: #10b981; color: #fff;
+            border: none; border-radius: 9px;
+            font-size: 15px; font-weight: 700;
+            cursor: pointer; margin-top: 10px;
+            transition: background .15s, transform .1s;
+        }
+        .btn-submit:hover { background: #059669; }
+        .btn-submit:active { transform: scale(.99); }
+
+        .auth-link { margin-top: 22px; text-align: center; font-size: 14px; color: #64748b; }
+        .auth-link a { color: #10b981; font-weight: 600; }
+        .auth-link a:hover { text-decoration: underline; }
+
+        .password-hint { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+
+        @media (max-width: 760px) {
+            body { padding: 0; align-items: stretch; }
+            .auth-page { grid-template-columns: 1fr; border-radius: 0; box-shadow: none; min-height: 100vh; }
+            .auth-brand { display: none; }
+            .auth-form-panel { padding: 36px 24px; }
+            .form-grid { grid-template-columns: 1fr; }
+            .form-group.full { grid-column: auto; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-page">
+    <!-- Left brand panel -->
+    <div class="auth-brand">
+        <div class="brand-logo">
+            <div class="brand-logo-icon">
+                <svg viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+            </div>
+            <span class="brand-logo-text">FreshTrack</span>
+        </div>
+
+        <div class="brand-headline">
+            <h2>Start Your Smarter Food Journey Today</h2>
+            <p>Join FreshTrack and take control of your food inventory, freshness monitoring, and waste reduction.</p>
+
+            <div class="brand-features">
+                <div class="brand-feature"><span class="feature-dot"></span>Free to use &mdash; no credit card needed</div>
+                <div class="brand-feature"><span class="feature-dot"></span>Real-time freshness tracking</div>
+                <div class="brand-feature"><span class="feature-dot"></span>Waste analytics and reporting</div>
+                <div class="brand-feature"><span class="feature-dot"></span>AI-powered food recommendations</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right form panel -->
+    <div class="auth-form-panel">
+        <div class="auth-title">Create your account</div>
+        <div class="auth-subtitle">Get started with FreshTrack in seconds</div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="flash-msg {% if category == 'success' %}success{% endif %}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('register') }}" novalidate>
+            <div class="form-grid">
+                <div class="form-group full">
+                    <label for="username">Username</label>
+                    <input id="username" name="username" type="text"
+                           placeholder="Choose a username (3–30 characters)"
+                           required minlength="3" maxlength="30"
+                           autocomplete="username">
+                </div>
+
+                <div class="form-group full">
+                    <label for="email">Email Address</label>
+                    <input id="email" name="email" type="email"
+                           placeholder="Enter your email address"
+                           required maxlength="254"
+                           autocomplete="email">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input id="password" name="password" type="password"
+                           placeholder="Min. 8 characters"
+                           required minlength="8"
+                           autocomplete="new-password">
+                    <span class="password-hint">At least 8 characters</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm_password">Confirm Password</label>
+                    <input id="confirm_password" name="confirm_password" type="password"
+                           placeholder="Repeat your password"
+                           required minlength="8"
+                           autocomplete="new-password">
+                </div>
+
+                <div class="form-group full">
+                    <button type="submit" class="btn-submit">Create Account</button>
+                </div>
+            </div>
+        </form>
+
+        <div class="auth-link">
+            Already have an account? <a href="{{ url_for('login') }}">Sign in</a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
