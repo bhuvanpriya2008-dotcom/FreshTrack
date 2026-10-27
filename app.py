@@ -6,7 +6,7 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
-from database import create_database as initialize_database
+from database import get_connection, create_database
 load_dotenv()
 
 app = Flask(__name__)
@@ -53,39 +53,7 @@ FOOD_DATA = {
 }
 
 
-def get_connection():
-    conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON")
-    return conn
 
-
-def create_database():
-    """Verify existing database tables without resetting stored data."""
-    conn = get_connection()
-    try:
-        tables = conn.execute("""
-            SELECT name FROM sqlite_master WHERE type = 'table'
-        """).fetchall()
-        table_names = {row["name"] for row in tables}
-
-        for table in ("food_items", "food_waste"):
-            if table not in table_names:
-                raise RuntimeError(
-                    f"Required table '{table}' is missing from {DATABASE}"
-                )
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS ai_chat_history (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                question TEXT NOT NULL,
-                answer TEXT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
-        conn.commit()
-    finally:
-        conn.close()
 
 
 def get_freshness(food_name, purchase_date, storage):
@@ -162,7 +130,7 @@ def get_food_image(food_name):
 
 @app.route("/")
 def home():
-    user_id = 1
+    user_id = session.get("user_id", 1)
     conn = get_connection()
 
     try:
@@ -293,13 +261,14 @@ def add_food():
         flash("Please select a valid storage type.", "error")
         return redirect(url_for("home"))
 
+    user_id = session.get("user_id", 1)
     conn = get_connection()
     try:
         conn.execute("""
             INSERT INTO food_items
                 (food_name, quantity, purchase_date, storage, user_id)
             VALUES (?, ?, ?, ?, ?)
-        """, (food_name, quantity, purchase_date, storage, 1))
+        """, (food_name, quantity, purchase_date, storage, user_id))
         conn.commit()
     finally:
         conn.close()
@@ -310,11 +279,12 @@ def add_food():
 
 @app.route("/delete_food/<int:food_id>", methods=["POST"])
 def delete_food(food_id):
+    user_id = session.get("user_id", 1)
     conn = get_connection()
     try:
         conn.execute(
             "DELETE FROM food_items WHERE id = ? AND user_id = ?",
-            (food_id, 1),
+            (food_id, user_id),
         )
         conn.commit()
     finally:
@@ -348,13 +318,14 @@ def log_waste():
         flash("Waste date cannot be in the future.", "error")
         return redirect(url_for("home"))
 
+    user_id = session.get("user_id", 1)
     conn = get_connection()
     try:
         conn.execute("""
             INSERT INTO food_waste
                 (food_name, quantity, waste_date, reason, user_id)
             VALUES (?, ?, ?, ?, ?)
-        """, (food_name, quantity, waste_date, reason, 1))
+        """, (food_name, quantity, waste_date, reason, user_id))
         conn.commit()
     finally:
         conn.close()
@@ -365,11 +336,12 @@ def log_waste():
 
 @app.route("/delete_waste/<int:waste_id>", methods=["POST"])
 def delete_waste(waste_id):
+    user_id = session.get("user_id", 1)
     conn = get_connection()
     try:
         conn.execute(
             "DELETE FROM food_waste WHERE id = ? AND user_id = ?",
-            (waste_id, 1),
+            (waste_id, user_id),
         )
         conn.commit()
     finally:
@@ -395,13 +367,14 @@ def ai_assistant():
     try:
         from google import genai
 
+        user_id = session.get("user_id", 1)
         conn = get_connection()
         try:
             food_items = conn.execute(
-                "SELECT * FROM food_items WHERE user_id = ?", (1,)
+                "SELECT * FROM food_items WHERE user_id = ?", (user_id,)
             ).fetchall()
             food_waste = conn.execute(
-                "SELECT * FROM food_waste WHERE user_id = ?", (1,)
+                "SELECT * FROM food_waste WHERE user_id = ?", (user_id,)
             ).fetchall()
         finally:
             conn.close()
@@ -460,7 +433,7 @@ guidance rather than relying on appearance or AI predictions.
                     VALUES (?, ?, ?)
                     """,
                     (
-                        1,
+                        user_id,
                         user_question or "General food-waste recommendations",
                         suggestion,
                     ),
@@ -487,7 +460,7 @@ guidance rather than relying on appearance or AI predictions.
 
 @app.route("/edit_food/<int:food_id>", methods=["GET", "POST"])
 def edit_food(food_id):
-    user_id = 1
+    user_id = session.get("user_id", 1)
     conn = get_connection()
     try:
         food = conn.execute(
@@ -580,10 +553,11 @@ def register():
                 flash("Username or email is already registered.", "error")
                 return render_template("register.html")
 
+            created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             password_hash = generate_password_hash(password)
             conn.execute(
-                "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)",
-                (username, email, password_hash),
+                "INSERT INTO users (username, email, password_hash, created_at) VALUES (?, ?, ?, ?)",
+                (username, email, password_hash, created_at),
             )
             conn.commit()
         finally:
@@ -631,7 +605,7 @@ def logout():
     flash("You have been signed out.", "success")
     return redirect(url_for("login"))
 
-initialize_database()
 create_database()
+
 if __name__ == "__main__":
     app.run(debug=True)
