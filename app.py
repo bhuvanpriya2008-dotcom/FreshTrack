@@ -353,7 +353,8 @@ def delete_waste(waste_id):
 
 @app.route("/health")
 def health():
-    return {"status": "running", "application": "FreshTrack"}
+    db_backend = "postgresql" if os.getenv("DATABASE_URL") else "sqlite"
+    return {"status": "running", "application": "FreshTrack", "database": db_backend}
 
 
 @app.route("/ai_assistant", methods=["POST"])
