@@ -6,7 +6,7 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
-
+from database import create_database as initialize_database
 load_dotenv()
 
 app = Flask(__name__)
@@ -631,8 +631,7 @@ def logout():
     flash("You have been signed out.", "success")
     return redirect(url_for("login"))
 
-
+initialize_database()
 create_database()
-
 if __name__ == "__main__":
     app.run(debug=True)
